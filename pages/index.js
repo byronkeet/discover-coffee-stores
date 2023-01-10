@@ -5,15 +5,31 @@ import { Fragment } from 'react';
 import Banner from '../components/Banner';
 import Card from '../components/card';
 
-import coffeeStoresData from '../data/coffee-stores.json';
-
 import styles from '../styles/Home.module.css';
 
 export async function getStaticProps(context) {
-	console.log('getStaticProps', context)
+	const options = {
+		method: 'GET',
+		headers: {
+		  accept: 'application/json',
+		  Authorization: process.env.FOURSQUARE_API_KEY
+		}
+	};
+
+	let data;
+	
+	try {
+		const response = await fetch('https://api.foursquare.com/v3/places/search?query=coffee&ll=-33.7896601%2C18.9521995&limit=6', options);
+
+		data = await response.json();
+		console.log(data)
+	} catch (err) {
+		console.error(err);
+	}
+	
 	return {
 		props: {
-			coffeeStores: coffeeStoresData,
+			coffeeStores: data.results,
 		}
 	}
 }
@@ -44,10 +60,10 @@ export default function Home({coffeeStores}) {
 				<div className={styles.cardLayout}>
 					{coffeeStores.map((coffeeStore) => (
 						<Card
-							key={coffeeStore.id}
+							key={coffeeStore.fsq_id}
 							name={coffeeStore.name}
 							imgUrl={coffeeStore.imgUrl}
-							href={`coffee-store/${coffeeStore.id}`}
+							href={`coffee-store/${coffeeStore.fsq_id}`}
 							className={styles.card}
 						/>
 					))}
