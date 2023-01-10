@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import  { useRouter } from 'next/router';
 import Link from 'next/link';
 
@@ -6,6 +6,8 @@ import Head from 'next/head';
 import cls from "classnames";
 import Image from 'next/image';
 import { fetchCoffeeStores } from '../../lib/coffee-stores';
+import { StoreContext } from '../_app';
+import { isEmpty } from '../../utils';
 
 import styles from '../../styles/coffee-store.module.css';
 
@@ -33,14 +35,33 @@ export async function getStaticPaths() {
 	}
 }
 
-const CoffeeStore = (props) => {
+const CoffeeStore = (initialProps) => {
+	const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+	const {
+		state: { coffeeStores }
+	} = useContext(StoreContext);
+
 	const router = useRouter();
+	const id = router.query.id;
+
+	useEffect(() => {
+		if (isEmpty(initialProps.coffeeStore)) {
+			if (coffeeStores.length > 0) {
+				const findCoffeeStoreById = coffeeStores.find(coffeeStore => coffeeStore.id.toString() === id);
+				setCoffeeStore(findCoffeeStoreById);
+			}
+		}
+	}, [id, initialProps.coffeeStore, coffeeStores]);
+
+	
 
 	if (router.isFallback) {
 		return <div>Loading...</div>
 	}
 
-	const { address, neighborhood, name, imgUrl } = props.coffeeStore;
+	const { name, address, neighborhood, imgUrl } = coffeeStore;
+	console.log(coffeeStore)
 
 	const handleUpvoteButton = () => {
 		console.log('handle upvote')
