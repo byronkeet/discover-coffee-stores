@@ -6,6 +6,7 @@ import Banner from '../components/Banner';
 import Card from '../components/card';
 
 import { fetchCoffeeStores } from '../lib/coffee-stores';
+import useTrackLocation from '../hooks/use-track-location';
 
 import styles from '../styles/Home.module.css';
 
@@ -20,9 +21,13 @@ export async function getStaticProps(context) {
 }
 
 export default function Home({coffeeStores}) {
+
+	const { latLng, locationErrorMsg, handleTrackLocation, isFindingLocation } = useTrackLocation();
+
 	const handleOnBannerBtnClick = () => {
-		console.log('Hi from banner button')
+		handleTrackLocation();
 	}
+
 	return (
 		<div className={styles.container}>
 		<Head>
@@ -33,28 +38,31 @@ export default function Home({coffeeStores}) {
 		</Head>
 		<main className={styles.main}>
 			<Banner
-				buttonText='View stores nearby'
+				buttonText={isFindingLocation ? "Locating..." : "View stores nearby"}
 				handleOnClick={handleOnBannerBtnClick}
 			/>
+			{locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
 			<div className={styles.heroImage}>
 				<Image src='/static/hero-image.png' width={700} height={400} alt='banner image'/>
 			</div>
-			{coffeeStores.length > 0 &&
-			<Fragment>
-				<h2 className={styles.heading2}>Toronto stores</h2>
-				<div className={styles.cardLayout}>
-					{coffeeStores.map((coffeeStore) => (
-						<Card
-							key={coffeeStore.id}
-							name={coffeeStore.name}
-							imgUrl={coffeeStore.imgUrl}
-							href={`coffee-store/${coffeeStore.id}`}
-							className={styles.card}
-						/>
-					))}
+			<div className={styles.sectionWrapper}>
+				{coffeeStores.length > 0 &&
+				<Fragment>
+					<h2 className={styles.heading2}>Toronto stores</h2>
+					<div className={styles.cardLayout}>
+						{coffeeStores.map((coffeeStore) => (
+							<Card
+								key={coffeeStore.id}
+								name={coffeeStore.name}
+								imgUrl={coffeeStore.imgUrl}
+								href={`coffee-store/${coffeeStore.id}`}
+								className={styles.card}
+							/>
+						))}
 
-				</div>
-			</Fragment>}
+					</div>
+				</Fragment>}
+			</div>
 		</main>
 		</div>
 	)
