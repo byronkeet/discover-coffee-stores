@@ -1,12 +1,13 @@
 import Head from 'next/head';
 import Image from 'next/image';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useContext } from 'react';
 
 import Banner from '../components/Banner';
 import Card from '../components/card';
 
 import { fetchCoffeeStores } from '../lib/coffee-stores';
 import useTrackLocation from '../hooks/use-track-location';
+import { ACTION_TYPES, StoreContext } from './_app';
 
 import styles from '../styles/Home.module.css';
 
@@ -20,11 +21,15 @@ export async function getStaticProps(context) {
 	}
 }
 
-export default function Home({coffeeStores}) {
-	const [coffeeShops, setCoffeeShops] = useState([]);
-	const [coffeeShopsError, setCoffeeShopsError] = useState(null);
+export default function Home(props) {
+	// const [coffeeShops, setCoffeeShops] = useState([]);
+	const [coffeeStoresError, setCoffeeStoresError] = useState(null);
 
-	const { latLong, locationErrorMsg, handleTrackLocation, isFindingLocation } = useTrackLocation();
+	const { locationErrorMsg, handleTrackLocation, isFindingLocation } = useTrackLocation();
+
+	const { dispatch, state } = useContext(StoreContext);
+
+	const { coffeeStores, latLong } = state;
 
 	const handleOnBannerBtnClick = () => {
 		handleTrackLocation();
@@ -35,17 +40,21 @@ export default function Home({coffeeStores}) {
 			if (latLong) {
 				try {
 					const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 6);
-					setCoffeeShops(fetchedCoffeeStores);
+					// setCoffeeShops(fetchedCoffeeStores);
+					dispatch({
+						type: ACTION_TYPES.SET_COFFEE_STORES,
+						payload: { coffeeStores: fetchedCoffeeStores }
+					})
 					//set coffee stores
 				} catch (error) {
 					//set error
-					setCoffeeShopsError(error.message);
+					setCoffeeStoresError(error.message);
 					console.log({ error });
 				}
 			}
 		}
 		setCoffeeStoresByLocation();
-	}, [latLong]);
+	}, [latLong, dispatch]);
 
 	return (
 		<div className={styles.container}>
@@ -61,16 +70,16 @@ export default function Home({coffeeStores}) {
 				handleOnClick={handleOnBannerBtnClick}
 			/>
 			{locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
-			{coffeeShopsError && <p>Something went wrong: {coffeeShopsError}</p>}
+			{coffeeStoresError && <p>Something went wrong: {coffeeStoresError}</p>}
 			<div className={styles.heroImage}>
 				<Image src='/static/hero-image.png' width={700} height={400} alt='banner image'/>
 			</div>
-			{coffeeShops.length > 0 &&
+			{coffeeStores.length > 0 &&
 				<div className={styles.sectionWrapper}>
 					<Fragment>
 						<h2 className={styles.heading2}>Stores near me</h2>
 						<div className={styles.cardLayout}>
-							{coffeeShops.map((coffeeStore) => (
+							{coffeeStores.map((coffeeStore) => (
 								<Card
 									key={coffeeStore.id}
 									name={coffeeStore.name}
@@ -84,12 +93,12 @@ export default function Home({coffeeStores}) {
 					</Fragment>
 				</div>
 			}
-			{coffeeStores.length > 0 &&
+			{props.coffeeStores.length > 0 &&
 				<div className={styles.sectionWrapper}>
 					<Fragment>
 						<h2 className={styles.heading2}>Toronto stores</h2>
 						<div className={styles.cardLayout}>
-							{coffeeStores.map((coffeeStore) => (
+							{props.coffeeStores.map((coffeeStore) => (
 								<Card
 									key={coffeeStore.id}
 									name={coffeeStore.name}
