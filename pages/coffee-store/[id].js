@@ -6,7 +6,7 @@ import Head from 'next/head';
 import cls from "classnames";
 import Image from 'next/image';
 import { fetchCoffeeStores } from '../../lib/coffee-stores';
-import { StoreContext } from '../_app';
+import { StoreContext } from '../../store/store-context';
 import { isEmpty } from '../../utils';
 
 import styles from '../../styles/coffee-store.module.css';
