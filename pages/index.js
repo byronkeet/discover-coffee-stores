@@ -24,7 +24,7 @@ export default function Home({coffeeStores}) {
 	const [coffeeShops, setCoffeeShops] = useState([]);
 	const [coffeeShopsError, setCoffeeShopsError] = useState(null);
 
-	const { latLng, locationErrorMsg, handleTrackLocation, isFindingLocation } = useTrackLocation();
+	const { latLong, locationErrorMsg, handleTrackLocation, isFindingLocation } = useTrackLocation();
 
 	const handleOnBannerBtnClick = () => {
 		handleTrackLocation();
@@ -32,10 +32,9 @@ export default function Home({coffeeStores}) {
 
 	useEffect(() => {
 		const setCoffeeStoresByLocation = async () => {
-			if (latLng) {
+			if (latLong) {
 				try {
-					const fetchedCoffeeStores = await fetchCoffeeStores(latLng, 6);
-					console.log({ fetchedCoffeeStores });
+					const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 6);
 					setCoffeeShops(fetchedCoffeeStores);
 					//set coffee stores
 				} catch (error) {
@@ -46,7 +45,7 @@ export default function Home({coffeeStores}) {
 			}
 		}
 		setCoffeeStoresByLocation();
-	}, [latLng]);
+	}, [latLong]);
 
 	return (
 		<div className={styles.container}>
