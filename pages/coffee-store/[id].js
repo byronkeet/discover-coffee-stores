@@ -45,12 +45,41 @@ const CoffeeStore = (initialProps) => {
 	const router = useRouter();
 	const id = router.query.id;
 
+	const handleCreateCoffeeStore = async (coffeeStore) => {
+		try {
+			const { id, name, address, neighborhood, voting, imgUrl } = coffeeStore;
+			const response = await fetch('/api/createCoffeeStore', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id,
+					name,
+					address: address || '',
+					neighborhood: neighborhood || '',
+					voting: 0,
+					imgUrl
+				})
+			});
+
+			const dbCoffeeStore = await response.json();
+			console.log({ dbCoffeeStore });
+		} catch (err) {
+			console.error('Error creating coffee store', err);
+		}
+	}
+
 	useEffect(() => {
 		if (isEmpty(initialProps.coffeeStore)) {
 			if (coffeeStores.length > 0) {
-				const findCoffeeStoreById = coffeeStores.find(coffeeStore => coffeeStore.id.toString() === id);
-				setCoffeeStore(findCoffeeStoreById);
+				const coffeeStoreFromContext = coffeeStores.find(coffeeStore => coffeeStore.id.toString() === id);
+				setCoffeeStore(coffeeStoreFromContext);
+				handleCreateCoffeeStore(coffeeStoreFromContext)
 			}
+		} else {
+			// SSG
+			handleCreateCoffeeStore(initialProps.coffeeStore)
 		}
 	}, [id, initialProps.coffeeStore, coffeeStores]);
 
