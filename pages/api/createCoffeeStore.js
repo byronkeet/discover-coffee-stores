@@ -1,8 +1,5 @@
-import Airtable from 'airtable';
+import { table, getMinifiedRecords } from "../../lib/airtable";
 
-const base = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(process.env.AIRTABLE_BASE_KEY);
-
-const table = base('coffee-stores');
 
 const createCoffeeStore = async (req, res) => {
 
@@ -11,16 +8,12 @@ const createCoffeeStore = async (req, res) => {
 		try {
 			if (id) {
 				const findCoffeeStoreRecords = await table.select({
-					filterByFormula: `id=${id}`
+					filterByFormula: `id="${id}"`
 				})
 				.firstPage();
 
 				if (findCoffeeStoreRecords.length !== 0) {
-					const records = findCoffeeStoreRecords.map((record) => {
-						return {
-							...record.fields
-						}
-					});
+					const records = getMinifiedRecords(findCoffeeStoreRecords);
 					res.json(records);
 				} else {
 					// create a record
@@ -37,11 +30,7 @@ const createCoffeeStore = async (req, res) => {
 								}
 							}
 						]);
-						const records = createRecords.map((record) => {
-							return {
-								...record.fields
-							}
-						});
+						const records = getMinifiedRecords(createRecords);
 						res.json(records)
 					} else {
 						res.status(400);
