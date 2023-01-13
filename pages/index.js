@@ -39,7 +39,6 @@ export default function Home(props) {
 		const setCoffeeStoresByLocation = async () => {
 			if (latLong) {
 				try {
-					console.log(latLong)
 					const response = await fetch(
 						`/api/getCoffeeStoresByLocation?latLong=${latLong}&limit=20`
 					  );
@@ -53,7 +52,7 @@ export default function Home(props) {
 				} catch (error) {
 					//set error
 					setCoffeeStoresError(error.message);
-					console.log({ error });
+					console.error({ error });
 				}
 			}
 		}
